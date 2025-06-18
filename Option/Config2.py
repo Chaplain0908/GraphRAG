@@ -9,6 +9,9 @@ from Config import *
 from Core.Common.Constants import CONFIG_ROOT, GRAPHRAG_ROOT
 from Core.Utils.YamlModel import YamlModel
 
+from dotenv import load_dotenv
+
+
 
 class WorkingParams(BaseModel):
     """Working parameters"""
@@ -78,6 +81,8 @@ class Config(WorkingParams, YamlModel):
     @classmethod
     def parse(cls, _path, dataset_name):
         """Parse config from yaml file"""
+        load_dotenv()
+
         opt = [parse(_path)]
 
         default_config_paths: List[Path] = [
@@ -89,10 +94,17 @@ class Config(WorkingParams, YamlModel):
         final = merge_dict(opt)
         final["dataset_name"] = dataset_name
         final["working_dir"] = os.path.join(final["working_dir"], dataset_name)
+
+        api_key_from_env = os.getenv("OPENAI_API_KEY")
+        if api_key_from_env:
+            final['llm']['api_key'] = api_key_from_env
+
         return Config(**final)
     
     @classmethod
     def default(cls):
+        load_dotenv()
+
         """Load default config
         - Priority: env < default_config_paths
         - Inside default_config_paths, the latter one overwrites the former one
