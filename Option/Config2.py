@@ -106,6 +106,13 @@ class Config(WorkingParams, YamlModel):
         dicts += [Config.read_yaml(path) for path in default_config_paths]
 
         final = merge_dict(dicts)
+
+        api_key_from_env = os.getenv("OPENAI_API_KEY")
+
+        if api_key_from_env:
+            if 'llm' not in final:
+                final['llm'] = {}
+            final['llm']['api_key'] = api_key_from_env
    
         return Config(**final)
 
